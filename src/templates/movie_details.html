@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}{{ movie.title }} ({{ movie.year }}) - Movie Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="mb-3">
+            <a href="{{ url_for('home') }}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Search
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card movie-card">
+            <div class="card-body text-center">
+                {% if movie.poster != "N/A" %}
+                    <img src="{{ movie.poster }}" 
+                         alt="{{ movie.title }} Poster" 
+                         class="img-fluid movie-poster mb-3"
+                         style="max-height: 400px;">
+                {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 400px; border-radius: 10px;">
+                        <i class="fas fa-film fa-5x text-muted"></i>
+                    </div>
+                {% endif %}
+                
+                {% if movie.imdb_rating != "N/A" %}
+                <div class="rating-badge mt-3">
+                    <i class="fas fa-star me-1"></i>{{ movie.imdb_rating }}/10
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card movie-card">
+            <div class="card-body">
+                <h1 class="card-title mb-3">
+                    {{ movie.title }}
+                    {% if movie.year != "N/A" %}
+                        <span class="text-muted">({{ movie.year }})</span>
+                    {% endif %}
+                </h1>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {% if movie.genre != "N/A" %}
+                        <p><strong><i class="fas fa-tags me-2"></i>Genre:</strong><br>
+                        {% for genre in movie.genre.split(', ') %}
+                            <span class="genre-badge">{{ genre }}</span>
+                        {% endfor %}
+                        </p>
+                        {% endif %}
+                        
+                        {% if movie.runtime != "N/A" %}
+                        <p><strong><i class="fas fa-clock me-2"></i>Runtime:</strong> {{ movie.runtime }}</p>
+                        {% endif %}
+                        
+                        {% if movie.rated != "N/A" %}
+                        <p><strong><i class="fas fa-certificate me-2"></i>Rated:</strong> {{ movie.rated }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6">
+                        {% if movie.released != "N/A" %}
+                        <p><strong><i class="fas fa-calendar me-2"></i>Released:</strong> {{ movie.released }}</p>
+                        {% endif %}
+                        
+                        {% if movie.language != "N/A" %}
+                        <p><strong><i class="fas fa-globe me-2"></i>Language:</strong> {{ movie.language }}</p>
+                        {% endif %}
+                        
+                        {% if movie.country != "N/A" %}
+                        <p><strong><i class="fas fa-flag me-2"></i>Country:</strong> {{ movie.country }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if movie.plot != "N/A" %}
+                <div class="mb-3">
+                    <h5><i class="fas fa-book-open me-2"></i>Plot</h5>
+                    <p class="text-muted">{{ movie.plot }}</p>
+                </div>
+                {% endif %}
+                
+                {% if movie.director != "N/A" %}
+                <div class="mb-3">
+                    <h6><i class="fas fa-video me-2"></i>Director</h6>
+                    <p>{{ movie.director }}</p>
+                </div>
+                {% endif %}
+                
+                {% if movie.actors != "N/A" %}
+                <div class="mb-3">
+                    <h6><i class="fas fa-users me-2"></i>Cast</h6>
+                    <p>{{ movie.actors }}</p>
+                </div>
+                {% endif %}
+                
+                {% if movie.awards != "N/A" %}
+                <div class="mb-3">
+                    <h6><i class="fas fa-trophy me-2"></i>Awards</h6>
+                    <p class="text-success">{{ movie.awards }}</p>
+                </div>
+                {% endif %}
+                
+                {% if movie.box_office != "N/A" %}
+                <div class="mb-3">
+                    <h6><i class="fas fa-dollar-sign me-2"></i>Box Office</h6>
+                    <p class="text-primary">{{ movie.box_office }}</p>
+                </div>
+                {% endif %}
+                
+                <div class="mt-4">
+                    {% if movie.imdb_id != "N/A" %}
+                    <a href="https://www.imdb.com/title/{{ movie.imdb_id }}/" 
+                       target="_blank" 
+                       class="btn btn-warning me-2">
+                        <i class="fab fa-imdb me-2"></i>View on IMDb
+                    </a>
+                    {% endif %}
+                    
+                    <button class="btn btn-success" onclick="shareMovie()">
+                        <i class="fas fa-share me-2"></i>Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>Search for Another Movie</h5>
+                <form method="POST" action="{{ url_for('search_movie') }}" class="d-inline-flex gap-2">
+                    <input type="text" 
+                           class="form-control" 
+                           name="movie_title" 
+                           placeholder="Enter another movie title..."
+                           style="width: 300px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function shareMovie() {
+        const title = "{{ movie.title }}";
+        const year = "{{ movie.year }}";
+        const url = window.location.href;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: `${title} (${year}) - Movie Details`,
+                text: `Check out this movie: ${title} (${year})`,
+                url: url
+            });
+        } else {
+            // Fallback: copy to clipboard
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Movie link copied to clipboard!');
+            });
+        }
+    }
+    
+    // Add some animation when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.movie-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 200);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Movie Search - Find Your Favorite Movies{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="text-center mb-4">
+            <h1 class="text-white mb-3">
+                <i class="fas fa-film me-3"></i>Discover Movies
+            </h1>
+            <p class="text-white-50 lead">Search for any movie and get detailed information instantly</p>
+        </div>
+
+        <div class="search-form">
+            <form method="POST" action="{{ url_for('search_movie') }}">
+                <div class="row g-3">
+                    <div class="col-md-9">
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               name="movie_title" 
+                               placeholder="Enter movie title (e.g., Inception, The Matrix, Titanic...)"
+                               required
+                               autocomplete="off">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-lightbulb me-2 text-warning"></i>Try searching for:
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-chevron-right me-2 text-primary"></i>Inception</li>
+                            <li><i class="fas fa-chevron-right me-2 text-primary"></i>The Matrix</li>
+                            <li><i class="fas fa-chevron-right me-2 text-primary"></i>Pulp Fiction</li>
+                            <li><i class="fas fa-chevron-right me-2 text-primary"></i>The Godfather</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-chevron-right me-2 text-primary"></i>Titanic</li>
+                            <li><i class="fas fa-chevron-right me-2 text-primary"></i>Avatar</li>
+                            <li><i class="fas fa-chevron-right me-2 text-primary"></i>Forrest Gump</li>
+                            <li><i class="fas fa-chevron-right me-2 text-primary"></i>The Dark Knight</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('popular_movies') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-star me-2"></i>View Popular Movies
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                        <h5>Search Movies</h5>
+                        <p class="text-muted">Find any movie by title and get comprehensive details</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-info-circle fa-3x text-success mb-3"></i>
+                        <h5>Detailed Info</h5>
+                        <p class="text-muted">Get plot, cast, ratings, and much more information</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                        <h5>IMDb Ratings</h5>
+                        <p class="text-muted">See official IMDb ratings and user reviews</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add some interactivity
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="movie_title"]');
+        const searchForm = document.querySelector('form');
+        
+        // Focus on search input when page loads
+        searchInput.focus();
+        
+        // Add loading state when form is submitted
+        searchForm.addEventListener('submit', function() {
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Searching...';
+            submitBtn.disabled = true;
+        });
+    });
+</script>
+{% endblock %}

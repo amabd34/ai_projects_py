@@ -8,3 +8,48 @@ wheels/
 
 # Virtual environments
 .venv
+venv/
+env/
+ENV/
+
+# Environment and Configuration Files
+.env
+src/config/config.json
+config.json
+*.local.json
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+log/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# API Keys and Secrets (extra protection)
+*api_key*
+*secret*
+*password*
+*token*
+.secrets/
+
+# Flask
+instance/
+.webassets-cache
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Popular Movies - Movie Search{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-4">
+            <h1 class="text-white mb-3">
+                <i class="fas fa-star me-3"></i>Popular Movies
+            </h1>
+            <p class="text-white-50 lead">Discover some of the most acclaimed movies of all time</p>
+        </div>
+        
+        <div class="mb-3">
+            <a href="{{ url_for('home') }}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Search
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for movie in movies %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card movie-card h-100">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4">
+                        {% if movie.poster != "N/A" %}
+                            <img src="{{ movie.poster }}" 
+                                 alt="{{ movie.title }} Poster" 
+                                 class="img-fluid movie-poster"
+                                 style="max-height: 150px; width: 100%; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" 
+                                 style="height: 150px; border-radius: 5px;">
+                                <i class="fas fa-film fa-2x text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-8">
+                        <h6 class="card-title mb-2">
+                            {{ movie.title }}
+                            {% if movie.year != "N/A" %}
+                                <small class="text-muted">({{ movie.year }})</small>
+                            {% endif %}
+                        </h6>
+                        
+                        {% if movie.imdb_rating != "N/A" %}
+                        <div class="rating-badge mb-2">
+                            <i class="fas fa-star me-1"></i>{{ movie.imdb_rating }}
+                        </div>
+                        {% endif %}
+                        
+                        {% if movie.genre != "N/A" %}
+                        <div class="mb-2">
+                            {% for genre in movie.genre.split(', ')[:2] %}
+                                <span class="genre-badge">{{ genre }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if movie.runtime != "N/A" %}
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>{{ movie.runtime }}
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if movie.plot != "N/A" %}
+                <div class="mt-3">
+                    <p class="card-text text-muted small">
+                        {{ movie.plot[:120] }}{% if movie.plot|length > 120 %}...{% endif %}
+                    </p>
+                </div>
+                {% endif %}
+                
+                <div class="mt-auto">
+                    <form method="POST" action="{{ url_for('search_movie') }}" class="d-inline">
+                        <input type="hidden" name="movie_title" value="{{ movie.title }}">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-info-circle me-1"></i>View Details
+                        </button>
+                    </form>
+                    
+                    {% if movie.imdb_id != "N/A" %}
+                    <a href="https://www.imdb.com/title/{{ movie.imdb_id }}/" 
+                       target="_blank" 
+                       class="btn btn-outline-warning btn-sm ms-1">
+                        <i class="fab fa-imdb"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not movies %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                <h5>No Popular Movies Found</h5>
+                <p class="text-muted">There was an issue loading the popular movies. Please try again later.</p>
+                <a href="{{ url_for('home') }}" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>Search Movies Instead
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>Can't Find What You're Looking For?</h5>
+                <p class="text-muted">Search for any movie title to get detailed information</p>
+                <form method="POST" action="{{ url_for('search_movie') }}" class="d-inline-flex gap-2">
+                    <input type="text" 
+                           class="form-control" 
+                           name="movie_title" 
+                           placeholder="Enter movie title..."
+                           style="width: 300px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add staggered animation for movie cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.movie-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}

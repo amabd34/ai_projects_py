@@ -1,0 +1,188 @@
+/* Custom CSS for Movie Search Application */
+
+/* Additional animations and effects */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Enhanced movie cards */
+.movie-card-enhanced {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.movie-card-enhanced:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+/* Search input enhancements */
+.search-input-container {
+    position: relative;
+}
+
+.search-input-container .form-control {
+    padding-left: 50px;
+}
+
+.search-input-container .search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    z-index: 10;
+}
+
+/* Rating stars */
+.rating-stars {
+    color: #ffc107;
+    font-size: 1.2rem;
+}
+
+/* Genre tags */
+.genre-tag {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    margin: 2px;
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.genre-tag:hover {
+    transform: scale(1.1);
+}
+
+/* Poster image enhancements */
+.poster-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+}
+
+.poster-container img {
+    transition: transform 0.3s ease;
+}
+
+.poster-container:hover img {
+    transform: scale(1.1);
+}
+
+/* Success and error messages */
+.alert-custom {
+    border: none;
+    border-radius: 15px;
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+}
+
+.alert-success-custom {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+}
+
+.alert-error-custom {
+    background: linear-gradient(45deg, #dc3545, #fd7e14);
+    color: white;
+}
+
+/* Navigation enhancements */
+.navbar-custom {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Footer styling */
+.footer-custom {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 4rem;
+    padding: 2rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .movie-card-enhanced {
+        margin-bottom: 1.5rem;
+    }
+    
+    .search-input-container .form-control {
+        padding-left: 15px;
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    .search-input-container .search-icon {
+        display: none;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: white;
+    }
+    
+    .text-muted {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .navbar, .footer-custom, .btn {
+        display: none !important;
+    }
+    
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .card {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+}
