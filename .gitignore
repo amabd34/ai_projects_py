@@ -53,3 +53,9 @@ instance/
 *.temp
 .tmp/
 .temp/
+
+# ML Data and Models (large files)
+src/data/processed/
+*.pkl
+*.joblib
+*.model
