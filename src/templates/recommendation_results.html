@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if source_movie %}
+Movies Similar to {{ source_movie }} - Recommendations
+{% elif source_genre %}
+{{ source_genre }} Movies - Genre Recommendations
+{% else %}
+Movie Recommendations
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="mb-3">
+            <a href="{{ url_for('recommendations_page') }}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Recommendations
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-4">
+            {% if source_movie %}
+            <h1 class="text-white mb-3">
+                <i class="fas fa-film me-3"></i>Movies Similar to "{{ source_movie }}"
+            </h1>
+            <p class="text-white-50 lead">Based on content analysis and similarity scoring</p>
+            {% elif source_genre %}
+            <h1 class="text-white mb-3">
+                <i class="fas fa-tags me-3"></i>{{ source_genre }} Movies
+            </h1>
+            <p class="text-white-50 lead">Discover great {{ source_genre.lower() }} films</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if error %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if recommendations %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Found {{ recommendations|length }} Recommendations
+                    </h5>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="gridView">
+                            <i class="fas fa-th"></i> Grid
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm active" id="listView">
+                            <i class="fas fa-list"></i> List
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="recommendationsContainer">
+    {% for rec in recommendations %}
+    <div class="row mb-4 recommendation-item">
+        <div class="col-md-3">
+            <div class="card movie-card h-100">
+                <div class="card-body text-center">
+                    {% if rec.poster and rec.poster != "N/A" %}
+                        <img src="{{ rec.poster }}" 
+                             alt="{{ rec.title }} Poster" 
+                             class="img-fluid movie-poster mb-3"
+                             style="max-height: 300px;">
+                    {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center" 
+                             style="height: 300px; border-radius: 10px;">
+                            <i class="fas fa-film fa-5x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    
+                    {% if rec.similarity_score is defined %}
+                    <div class="mt-2">
+                        <span class="badge bg-primary">
+                            {{ "%.0f"|format(rec.similarity_score * 100) }}% Match
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if rec.imdb_rating and rec.imdb_rating != "N/A" %}
+                    <div class="rating-badge mt-2">
+                        <i class="fas fa-star me-1"></i>{{ rec.imdb_rating }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card movie-card h-100">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">
+                        {{ rec.title }}
+                        {% if rec.year and rec.year != "N/A" %}
+                            <span class="text-muted">({{ rec.year }})</span>
+                        {% endif %}
+                    </h4>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {% if rec.genre and rec.genre != "N/A" %}
+                            <p><strong><i class="fas fa-tags me-2"></i>Genre:</strong><br>
+                            {% for genre in rec.genre.split(', ') %}
+                                <span class="genre-badge">{{ genre }}</span>
+                            {% endfor %}
+                            </p>
+                            {% endif %}
+                            
+                            {% if rec.runtime and rec.runtime != "N/A" %}
+                            <p><strong><i class="fas fa-clock me-2"></i>Runtime:</strong> {{ rec.runtime }}</p>
+                            {% endif %}
+                            
+                            {% if rec.rated and rec.rated != "N/A" %}
+                            <p><strong><i class="fas fa-certificate me-2"></i>Rated:</strong> {{ rec.rated }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {% if rec.released and rec.released != "N/A" %}
+                            <p><strong><i class="fas fa-calendar me-2"></i>Released:</strong> {{ rec.released }}</p>
+                            {% endif %}
+                            
+                            {% if rec.language and rec.language != "N/A" %}
+                            <p><strong><i class="fas fa-globe me-2"></i>Language:</strong> {{ rec.language }}</p>
+                            {% endif %}
+                            
+                            {% if rec.country and rec.country != "N/A" %}
+                            <p><strong><i class="fas fa-flag me-2"></i>Country:</strong> {{ rec.country }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if rec.overview and rec.overview != "N/A" %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-book-open me-2"></i>Plot</h6>
+                        <p class="text-muted">{{ rec.overview }}</p>
+                    </div>
+                    {% elif rec.plot and rec.plot != "N/A" %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-book-open me-2"></i>Plot</h6>
+                        <p class="text-muted">{{ rec.plot }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if rec.director and rec.director != "N/A" %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-video me-2"></i>Director</h6>
+                        <p>{{ rec.director }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if rec.actors and rec.actors != "N/A" %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-users me-2"></i>Cast</h6>
+                        <p>{{ rec.actors }}</p>
+                    </div>
+                    {% elif rec.cast and rec.cast != "N/A" %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-users me-2"></i>Cast</h6>
+                        <p>{{ rec.cast }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if rec.awards and rec.awards != "N/A" %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-trophy me-2"></i>Awards</h6>
+                        <p class="text-success">{{ rec.awards }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <form method="POST" action="{{ url_for('search_movie') }}" class="d-inline">
+                            <input type="hidden" name="movie_title" value="{{ rec.title }}">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-info-circle me-1"></i>Full Details
+                            </button>
+                        </form>
+                        
+                        <button class="btn btn-success me-2" onclick="getMoreRecommendations('{{ rec.title }}')">
+                            <i class="fas fa-magic me-1"></i>Similar Movies
+                        </button>
+                        
+                        {% if rec.imdb_id and rec.imdb_id != "N/A" %}
+                        <a href="https://www.imdb.com/title/{{ rec.imdb_id }}/" 
+                           target="_blank" 
+                           class="btn btn-warning me-2">
+                            <i class="fab fa-imdb me-1"></i>IMDb
+                        </a>
+                        {% endif %}
+                        
+                        <button class="btn btn-outline-secondary" onclick="shareMovie('{{ rec.title }}', '{{ rec.year or '' }}')">
+                            <i class="fas fa-share me-1"></i>Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Load More Button -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <button class="btn btn-outline-light btn-lg" onclick="loadMoreRecommendations()">
+            <i class="fas fa-plus me-2"></i>Load More Recommendations
+        </button>
+    </div>
+</div>
+
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-search fa-5x text-muted mb-4"></i>
+                <h5>No Recommendations Found</h5>
+                <p class="text-muted">
+                    {% if source_movie %}
+                    We couldn't find any similar movies for "{{ source_movie }}". 
+                    {% elif source_genre %}
+                    We couldn't find any movies in the "{{ source_genre }}" genre.
+                    {% endif %}
+                    Try searching for a different movie or genre.
+                </p>
+                <a href="{{ url_for('recommendations_page') }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Try Again
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function getMoreRecommendations(movieTitle) {
+        window.location.href = `/recommendations/${encodeURIComponent(movieTitle)}`;
+    }
+    
+    function shareMovie(title, year) {
+        if (window.MovieUtils && window.MovieUtils.shareMovie) {
+            window.MovieUtils.shareMovie(title, year, window.location.href);
+        } else {
+            // Fallback
+            const text = `Check out this movie recommendation: ${title} ${year ? '(' + year + ')' : ''}`;
+            if (navigator.share) {
+                navigator.share({ title: text, url: window.location.href });
+            } else {
+                navigator.clipboard.writeText(text + ' - ' + window.location.href);
+                alert('Movie recommendation copied to clipboard!');
+            }
+        }
+    }
+    
+    function loadMoreRecommendations() {
+        // This could be implemented to load more results via AJAX
+        alert('Load more functionality would be implemented here');
+    }
+    
+    // View toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const gridViewBtn = document.getElementById('gridView');
+        const listViewBtn = document.getElementById('listView');
+        
+        if (gridViewBtn && listViewBtn) {
+            gridViewBtn.addEventListener('click', function() {
+                // Switch to grid view (could be implemented)
+                listViewBtn.classList.remove('active');
+                gridViewBtn.classList.add('active');
+            });
+            
+            listViewBtn.addEventListener('click', function() {
+                // Switch to list view (current default)
+                gridViewBtn.classList.remove('active');
+                listViewBtn.classList.add('active');
+            });
+        }
+        
+        // Animate recommendation items
+        const items = document.querySelectorAll('.recommendation-item');
+        items.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                item.style.transition = 'all 0.6s ease';
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}

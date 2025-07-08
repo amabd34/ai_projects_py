@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Movie Recommendations - Discover Your Next Favorite Film{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="text-center mb-4">
+            <h1 class="text-white mb-3">
+                <i class="fas fa-magic me-3"></i>Movie Recommendations
+            </h1>
+            <p class="text-white-50 lead">Discover movies you'll love based on your preferences</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Recommendation Options -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-film me-2 text-primary"></i>Find Similar Movies
+                        </h5>
+                        <p class="card-text text-muted">
+                            Enter a movie you love and discover similar films you might enjoy
+                        </p>
+                        
+                        <form method="GET" action="#" id="movieRecommendationForm">
+                            <div class="mb-3">
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="movieTitle" 
+                                       placeholder="Enter a movie title (e.g., Inception, The Matrix...)"
+                                       required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>Get Recommendations
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-tags me-2 text-success"></i>Browse by Genre
+                        </h5>
+                        <p class="card-text text-muted">
+                            Explore movies from your favorite genres
+                        </p>
+                        
+                        {% if genres %}
+                        <form method="GET" action="#" id="genreRecommendationForm">
+                            <div class="mb-3">
+                                <select class="form-select" id="genreSelect" required>
+                                    <option value="">Choose a genre...</option>
+                                    {% for genre in genres %}
+                                    <option value="{{ genre }}">{{ genre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-list me-2"></i>Browse Genre
+                            </button>
+                        </form>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Genres not available. Please run preprocessing first.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-lightbulb me-2 text-warning"></i>How Our Recommendations Work
+                </h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                            <h6>AI-Powered Analysis</h6>
+                            <p class="text-muted small">
+                                Our system analyzes movie plots, genres, keywords, and cast to understand content similarity
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                            <h6>Similarity Scoring</h6>
+                            <p class="text-muted small">
+                                Movies are scored based on content similarity using advanced machine learning algorithms
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                            <h6>Personalized Results</h6>
+                            <p class="text-muted small">
+                                Get recommendations tailored to your taste with detailed movie information from IMDb
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popular Recommendations -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-fire me-2 text-danger"></i>Quick Start - Try These Popular Movies
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <button class="btn btn-outline-primary btn-sm w-100 quick-recommend" data-movie="Inception">
+                                    Inception
+                                </button>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <button class="btn btn-outline-primary btn-sm w-100 quick-recommend" data-movie="The Matrix">
+                                    The Matrix
+                                </button>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <button class="btn btn-outline-primary btn-sm w-100 quick-recommend" data-movie="Pulp Fiction">
+                                    Pulp Fiction
+                                </button>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <button class="btn btn-outline-primary btn-sm w-100 quick-recommend" data-movie="The Dark Knight">
+                                    The Dark Knight
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Information -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-code me-2 text-info"></i>Developer API
+                        </h5>
+                        <p class="text-muted">
+                            Access our recommendation engine programmatically:
+                        </p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Movie Recommendations</h6>
+                                <code class="small">GET /api/recommendations/&lt;movie_title&gt;</code>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Genre Recommendations</h6>
+                                <code class="small">GET /api/recommendations/genre/&lt;genre&gt;</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Movie recommendation form
+        document.getElementById('movieRecommendationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const movieTitle = document.getElementById('movieTitle').value.trim();
+            if (movieTitle) {
+                window.location.href = `/recommendations/${encodeURIComponent(movieTitle)}`;
+            }
+        });
+
+        // Genre recommendation form
+        document.getElementById('genreRecommendationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const genre = document.getElementById('genreSelect').value;
+            if (genre) {
+                window.location.href = `/recommendations/genre/${encodeURIComponent(genre)}`;
+            }
+        });
+
+        // Quick recommend buttons
+        document.querySelectorAll('.quick-recommend').forEach(button => {
+            button.addEventListener('click', function() {
+                const movieTitle = this.getAttribute('data-movie');
+                window.location.href = `/recommendations/${encodeURIComponent(movieTitle)}`;
+            });
+        });
+
+        // Add search suggestions to movie input
+        const movieInput = document.getElementById('movieTitle');
+        movieInput.addEventListener('keyup', function() {
+            // You could add autocomplete functionality here
+        });
+    });
+</script>
+{% endblock %}
