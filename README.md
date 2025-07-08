@@ -252,3 +252,4 @@ If you encounter any issues or have questions:
 ---
 
 Made with ❤️ for movie enthusiasts
+<img src="https://t.bkit.co/w_686d885765aeb.gif" />
