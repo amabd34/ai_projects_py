@@ -207,16 +207,10 @@
         <div class="card">
             <div class="card-body text-center">
                 <h5>Search for Another Movie</h5>
-                <form method="POST" action="{{ url_for('search_movie') }}" class="d-inline-flex gap-2">
-                    <input type="text"
-                           class="form-control"
-                           name="movie_title"
-                           placeholder="Enter another movie title..."
-                           style="width: 300px;">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </form>
+                <div style="max-width: 400px; margin: 0 auto;">
+                    {% set search_placeholder = "Enter another movie title..." %}
+                    {% include 'components/search_dropdown.html' with context %}
+                </div>
             </div>
         </div>
     </div>

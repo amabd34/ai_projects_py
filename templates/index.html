@@ -7,28 +7,29 @@
     <div class="col-md-8">
         <div class="text-center mb-4">
             <h1 class="text-white mb-3">
-                <i class="fas fa-film me-3"></i>Discover Movies
+                <i class="fas fa-film me-3"></i>Discover Moviess
             </h1>
             <p class="text-white-50 lead">Search for any movie and get detailed information instantly</p>
         </div>
 
         <div class="search-form">
-            <form method="POST" action="{{ url_for('search_movie') }}">
-                <div class="row g-3">
-                    <div class="col-md-9">
-                        <input type="text" 
-                               class="form-control form-control-lg" 
-                               name="movie_title" 
-                               placeholder="Enter movie title (e.g., Inception, The Matrix, Titanic...)"
-                               required
-                               autocomplete="off">
-                    </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary btn-lg w-100">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-9">
+                    {% set search_placeholder = "Enter movie title (e.g., Inception, The Matrix, Titanic...)" %}
+                    {% include 'components/search_dropdown.html' with context %}
+                </div>
+                <div class="col-md-3">
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-primary btn-lg" onclick="performTraditionalSearch()">
                             <i class="fas fa-search me-2"></i>Search
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <!-- Fallback form for traditional search -->
+            <form id="fallback-search-form" method="POST" action="{{ url_for('search_movie') }}" style="display: none;">
+                <input type="hidden" name="movie_title" id="fallback-movie-title">
             </form>
         </div>
 
@@ -104,13 +105,37 @@
 
 {% block scripts %}
 <script>
+    // Function for traditional search button
+    function performTraditionalSearch() {
+        const dropdownSearch = document.querySelector('[data-dropdown-search]');
+        if (dropdownSearch) {
+            const searchInput = dropdownSearch.querySelector('.dropdown-search-input');
+            if (searchInput && searchInput.value.trim()) {
+                // Use the fallback form to submit
+                document.getElementById('fallback-movie-title').value = searchInput.value.trim();
+                document.getElementById('fallback-search-form').submit();
+            } else {
+                // Focus on the input if empty
+                if (searchInput) searchInput.focus();
+            }
+        }
+    }
+
     // Add some interactivity
     document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.querySelector('input[name="movie_title"]');
-        const searchForm = document.querySelector('form');
-        
-        // Focus on search input when page loads
-        searchInput.focus();
+        // Initialize dropdown search with custom placeholder
+        const dropdownContainer = document.querySelector('[data-dropdown-search]');
+        if (dropdownContainer) {
+            new DropdownSearch(dropdownContainer, {
+                placeholder: "Enter movie title (e.g., Inception, The Matrix, Titanic...)"
+            });
+
+            // Focus on search input when page loads
+            setTimeout(() => {
+                const searchInput = dropdownContainer.querySelector('.dropdown-search-input');
+                if (searchInput) searchInput.focus();
+            }, 100);
+        }
         
         // Add loading state when form is submitted
         searchForm.addEventListener('submit', function() {

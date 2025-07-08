@@ -86,13 +86,48 @@ def register_routes(app):
         """API endpoint for movie search via POST."""
         if not is_feature_enabled('enable_api_endpoints'):
             return jsonify({"error": "API endpoints are disabled"}), 403
-        
+
         data = request.get_json()
         if not data or 'title' not in data:
             return jsonify({"error": "Missing 'title' in request body"}), 400
-        
+
         movie_data = movie_service.get_movie_full_details(data['title'])
         return jsonify(movie_data)
+
+    @app.route('/api/search/suggestions/<query>')
+    def api_search_suggestions(query):
+        """API endpoint for movie search suggestions (dropdown)."""
+        if not is_feature_enabled('enable_api_endpoints'):
+            return jsonify({"error": "API endpoints are disabled"}), 403
+
+        if not query or len(query.strip()) < 2:
+            return jsonify({"suggestions": []})
+
+        # Use the existing search functionality
+        search_results = movie_service.search_movies_by_title(query.strip())
+
+        if search_results["found"]:
+            # Format results for dropdown display
+            suggestions = []
+            for movie in search_results["results"][:8]:  # Limit to 8 suggestions
+                suggestions.append({
+                    "title": movie.get("Title", "N/A"),
+                    "year": movie.get("Year", "N/A"),
+                    "poster": movie.get("Poster", "N/A"),
+                    "imdb_id": movie.get("imdbID", "N/A"),
+                    "type": movie.get("Type", "movie")
+                })
+
+            return jsonify({
+                "suggestions": suggestions,
+                "total": len(suggestions)
+            })
+        else:
+            return jsonify({
+                "suggestions": [],
+                "total": 0,
+                "error": search_results.get("error", "No results found")
+            })
 
     @app.route('/api/popular')
     def api_popular():

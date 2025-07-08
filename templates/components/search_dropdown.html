@@ -1,0 +1,37 @@
+{# Dropdown Search Component #}
+
+{% set search_placeholder = search_placeholder or "Search for movies..." %}
+{% set search_class = search_class or "" %}
+{% set search_id = search_id or "dropdown-search" %}
+{% set min_length = min_length or 2 %}
+
+<div id="{{ search_id }}" 
+     class="dropdown-search-wrapper {{ search_class }}"
+     data-dropdown-search
+     data-placeholder="{{ search_placeholder }}"
+     data-min-length="{{ min_length }}">
+    <!-- The DropdownSearch JavaScript component will populate this container -->
+</div>
+
+<script>
+    // Ensure the dropdown search script is loaded
+    if (typeof DropdownSearch === 'undefined') {
+        const script = document.createElement('script');
+        script.src = '{{ url_for("static", filename="js/dropdown-search.js") }}';
+        document.head.appendChild(script);
+    }
+</script>
+
+<style>
+    .dropdown-search-wrapper {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+        .dropdown-search-wrapper {
+            max-width: 100%;
+        }
+    }
+</style>
