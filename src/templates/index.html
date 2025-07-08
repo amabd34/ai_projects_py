@@ -62,8 +62,11 @@
                     </div>
                 </div>
                 <div class="text-center mt-3">
-                    <a href="{{ url_for('popular_movies') }}" class="btn btn-outline-primary">
-                        <i class="fas fa-star me-2"></i>View Popular Movies
+                    <a href="{{ url_for('popular_movies') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-star me-2"></i>Popular Movies
+                    </a>
+                    <a href="{{ url_for('recommendations_page') }}" class="btn btn-outline-success">
+                        <i class="fas fa-magic me-2"></i>Get Recommendations
                     </a>
                 </div>
             </div>
@@ -98,6 +101,53 @@
                 </div>
             </div>
         </div>
+
+        <!-- Recommendation Feature Highlight -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                    <div class="card-body text-center text-white">
+                        <h4 class="mb-3">
+                            <i class="fas fa-magic me-2"></i>AI-Powered Movie Recommendations
+                        </h4>
+                        <p class="lead mb-4">
+                            Discover your next favorite movie with our intelligent recommendation system powered by machine learning
+                        </p>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-brain fa-2x mb-2"></i>
+                                    <h6>Smart Analysis</h6>
+                                    <small>Analyzes plots, genres, cast, and directors</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-chart-line fa-2x mb-2"></i>
+                                    <h6>Similarity Scoring</h6>
+                                    <small>Shows percentage match for each recommendation</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-database fa-2x mb-2"></i>
+                                    <h6>4,800+ Movies</h6>
+                                    <small>Comprehensive database of films</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a href="{{ url_for('recommendations_page') }}" class="btn btn-light btn-lg me-2">
+                                <i class="fas fa-magic me-2"></i>Try Recommendations
+                            </a>
+                            <button class="btn btn-outline-light btn-lg quick-recommend-demo" data-movie="Inception">
+                                <i class="fas fa-play me-2"></i>Demo: Movies like Inception
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -118,6 +168,15 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Searching...';
             submitBtn.disabled = true;
         });
+
+        // Quick recommendation demo button
+        const demoBtn = document.querySelector('.quick-recommend-demo');
+        if (demoBtn) {
+            demoBtn.addEventListener('click', function() {
+                const movieTitle = this.getAttribute('data-movie');
+                window.location.href = `/recommendations/${encodeURIComponent(movieTitle)}`;
+            });
+        }
     });
 </script>
 {% endblock %}

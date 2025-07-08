@@ -78,20 +78,27 @@
                 {% endif %}
                 
                 <div class="mt-auto">
-                    <form method="POST" action="{{ url_for('search_movie') }}" class="d-inline">
-                        <input type="hidden" name="movie_title" value="{{ movie.title }}">
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="fas fa-info-circle me-1"></i>View Details
-                        </button>
-                    </form>
-                    
-                    {% if movie.imdb_id != "N/A" %}
-                    <a href="https://www.imdb.com/title/{{ movie.imdb_id }}/" 
-                       target="_blank" 
-                       class="btn btn-outline-warning btn-sm ms-1">
-                        <i class="fab fa-imdb"></i>
-                    </a>
-                    {% endif %}
+                    <div class="d-flex flex-wrap gap-1">
+                        <form method="POST" action="{{ url_for('search_movie') }}" class="d-inline">
+                            <input type="hidden" name="movie_title" value="{{ movie.title }}">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-info-circle me-1"></i>Details
+                            </button>
+                        </form>
+
+                        <a href="{{ url_for('movie_recommendations', movie_title=movie.title) }}"
+                           class="btn btn-success btn-sm">
+                            <i class="fas fa-magic me-1"></i>Similar
+                        </a>
+
+                        {% if movie.imdb_id != "N/A" %}
+                        <a href="https://www.imdb.com/title/{{ movie.imdb_id }}/"
+                           target="_blank"
+                           class="btn btn-outline-warning btn-sm">
+                            <i class="fab fa-imdb"></i>
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>

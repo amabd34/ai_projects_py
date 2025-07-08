@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config.config_loader import config, get_config, is_feature_enabled
 from services.movie_service import movie_service
+from services.recommendation_service import recommendation_service
 
 def create_app():
     """Application factory pattern for Flask app creation."""
@@ -110,6 +111,114 @@ def register_routes(app):
             "count": len(movies)
         })
 
+    @app.route('/recommendations')
+    def recommendations_page():
+        """Recommendations page."""
+        if not is_feature_enabled('enable_recommendations'):
+            return render_template('index.html',
+                                 error="Recommendations feature is disabled",
+                                 suggestions=config.get_search_suggestions())
+
+        # Get available genres for the dropdown
+        genres = recommendation_service.get_available_genres()
+        return render_template('recommendations.html', genres=genres)
+
+    @app.route('/recommendations/<movie_title>')
+    def movie_recommendations(movie_title):
+        """Get recommendations for a specific movie."""
+        if not is_feature_enabled('enable_recommendations'):
+            return render_template('index.html',
+                                 error="Recommendations feature is disabled",
+                                 suggestions=config.get_search_suggestions())
+
+        # Get enhanced recommendations
+        recommendations = recommendation_service.get_enhanced_recommendations(movie_title)
+
+        if not recommendations:
+            return render_template('recommendations.html',
+                                 error=f"No recommendations found for '{movie_title}'",
+                                 genres=recommendation_service.get_available_genres())
+
+        return render_template('recommendation_results.html',
+                             recommendations=recommendations,
+                             source_movie=movie_title)
+
+    @app.route('/recommendations/genre/<genre>')
+    def genre_recommendations(genre):
+        """Get recommendations by genre."""
+        if not is_feature_enabled('enable_recommendations'):
+            return render_template('index.html',
+                                 error="Recommendations feature is disabled",
+                                 suggestions=config.get_search_suggestions())
+
+        # Get movies by genre
+        recommendations = recommendation_service.get_recommendations_by_genre(genre)
+
+        if not recommendations:
+            return render_template('recommendations.html',
+                                 error=f"No movies found for genre '{genre}'",
+                                 genres=recommendation_service.get_available_genres())
+
+        return render_template('recommendation_results.html',
+                             recommendations=recommendations,
+                             source_genre=genre)
+
+    @app.route('/api/recommendations/<movie_title>')
+    def api_movie_recommendations(movie_title):
+        """API endpoint for movie recommendations."""
+        if not is_feature_enabled('enable_api_endpoints') or not is_feature_enabled('enable_recommendations'):
+            return jsonify({"error": "Recommendations API is disabled"}), 403
+
+        num_recommendations = request.args.get('limit', 10, type=int)
+        enhanced = request.args.get('enhanced', 'true').lower() == 'true'
+
+        if enhanced:
+            recommendations = recommendation_service.get_enhanced_recommendations(movie_title, num_recommendations)
+        else:
+            recommendations = recommendation_service.get_movie_recommendations(movie_title, num_recommendations)
+
+        return jsonify({
+            "source_movie": movie_title,
+            "recommendations": recommendations,
+            "count": len(recommendations)
+        })
+
+    @app.route('/api/recommendations/genre/<genre>')
+    def api_genre_recommendations(genre):
+        """API endpoint for genre-based recommendations."""
+        if not is_feature_enabled('enable_api_endpoints') or not is_feature_enabled('enable_recommendations'):
+            return jsonify({"error": "Recommendations API is disabled"}), 403
+
+        num_recommendations = request.args.get('limit', 10, type=int)
+        recommendations = recommendation_service.get_recommendations_by_genre(genre, num_recommendations)
+
+        return jsonify({
+            "genre": genre,
+            "recommendations": recommendations,
+            "count": len(recommendations)
+        })
+
+    @app.route('/api/recommendations/genres')
+    def api_available_genres():
+        """API endpoint for available genres."""
+        if not is_feature_enabled('enable_api_endpoints') or not is_feature_enabled('enable_recommendations'):
+            return jsonify({"error": "Recommendations API is disabled"}), 403
+
+        genres = recommendation_service.get_available_genres()
+        return jsonify({
+            "genres": genres,
+            "count": len(genres)
+        })
+
+    @app.route('/api/recommendations/stats')
+    def api_recommendation_stats():
+        """API endpoint for recommendation dataset statistics."""
+        if not is_feature_enabled('enable_api_endpoints') or not is_feature_enabled('enable_recommendations'):
+            return jsonify({"error": "Recommendations API is disabled"}), 403
+
+        stats = recommendation_service.get_dataset_stats()
+        return jsonify(stats)
+
     @app.route('/health')
     def health_check():
         """Health check endpoint."""
@@ -120,7 +229,8 @@ def register_routes(app):
             "features": {
                 "popular_movies": is_feature_enabled('enable_popular_movies'),
                 "api_endpoints": is_feature_enabled('enable_api_endpoints'),
-                "sharing": is_feature_enabled('enable_sharing')
+                "sharing": is_feature_enabled('enable_sharing'),
+                "recommendations": is_feature_enabled('enable_recommendations')
             }
         })
 

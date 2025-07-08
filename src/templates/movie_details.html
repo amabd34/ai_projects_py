@@ -118,17 +118,84 @@
                 {% endif %}
                 
                 <div class="mt-4">
-                    {% if movie.imdb_id != "N/A" %}
-                    <a href="https://www.imdb.com/title/{{ movie.imdb_id }}/" 
-                       target="_blank" 
-                       class="btn btn-warning me-2">
-                        <i class="fab fa-imdb me-2"></i>View on IMDb
-                    </a>
-                    {% endif %}
-                    
-                    <button class="btn btn-success" onclick="shareMovie()">
-                        <i class="fas fa-share me-2"></i>Share
-                    </button>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <a href="{{ url_for('movie_recommendations', movie_title=movie.title) }}"
+                               class="btn btn-primary btn-lg me-2">
+                                <i class="fas fa-magic me-2"></i>Find Similar Movies
+                            </a>
+
+                            {% if movie.imdb_id != "N/A" %}
+                            <a href="https://www.imdb.com/title/{{ movie.imdb_id }}/"
+                               target="_blank"
+                               class="btn btn-warning me-2">
+                                <i class="fab fa-imdb me-2"></i>View on IMDb
+                            </a>
+                            {% endif %}
+
+                            <button class="btn btn-success" onclick="shareMovie()">
+                                <i class="fas fa-share me-2"></i>Share
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommendation Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+            <div class="card-body text-center text-white">
+                <h4 class="mb-3">
+                    <i class="fas fa-magic me-2"></i>Discover Similar Movies
+                </h4>
+                <p class="lead mb-4">
+                    Love "{{ movie.title }}"? Our AI-powered recommendation engine can find movies with similar themes, genres, and storytelling styles.
+                </p>
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <a href="{{ url_for('movie_recommendations', movie_title=movie.title) }}"
+                               class="btn btn-light btn-lg">
+                                <i class="fas fa-film me-2"></i>Get Movie Recommendations
+                            </a>
+
+                            {% if movie.genre != "N/A" %}
+                            {% set first_genre = movie.genre.split(',')[0].strip() %}
+                            <a href="{{ url_for('genre_recommendations', genre=first_genre) }}"
+                               class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-tags me-2"></i>More {{ first_genre }} Movies
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-brain fa-2x mb-2"></i>
+                            <h6>AI-Powered</h6>
+                            <small>Advanced machine learning algorithms</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-chart-line fa-2x mb-2"></i>
+                            <h6>Similarity Scoring</h6>
+                            <small>Percentage match based on content analysis</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-database fa-2x mb-2"></i>
+                            <h6>4,800+ Movies</h6>
+                            <small>Comprehensive movie database</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -141,9 +208,9 @@
             <div class="card-body text-center">
                 <h5>Search for Another Movie</h5>
                 <form method="POST" action="{{ url_for('search_movie') }}" class="d-inline-flex gap-2">
-                    <input type="text" 
-                           class="form-control" 
-                           name="movie_title" 
+                    <input type="text"
+                           class="form-control"
+                           name="movie_title"
                            placeholder="Enter another movie title..."
                            style="width: 300px;">
                     <button type="submit" class="btn btn-primary">
