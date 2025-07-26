@@ -155,7 +155,7 @@ ai-movie-discovery/
 
 7. **Launch Application**
    ```bash
-   python app.py
+   python src/app.py
    ```
 
 8. **Access the Platform**
