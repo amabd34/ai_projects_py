@@ -46,23 +46,72 @@ class MoviePreprocessor:
         
         # Initialize NLTK components
         try:
+            self.download_nltk_data()
             self.lemmatizer = WordNetLemmatizer()
             self.stop_words = set(stopwords.words('english'))
         except LookupError:
             print("⚠️ NLTK data not found, downloading...")
-            nltk.download('punkt', quiet=True)
-            nltk.download('stopwords', quiet=True)
-            nltk.download('wordnet', quiet=True)
+            self.download_nltk_data()
             self.lemmatizer = WordNetLemmatizer()
             self.stop_words = set(stopwords.words('english'))
-        
+        except Exception as e:
+            print(f"⚠️ NLTK initialization failed: {e}")
+            self.lemmatizer = None
+            self.stop_words = set()
+
         # Create processed data directory
         self.processed_data_path = Path(os.path.dirname(os.path.abspath(__file__))) / '..' / self.processed_data_dir
         self.processed_data_path.mkdir(parents=True, exist_ok=True)
-        
+
         print(f"✅ MoviePreprocessor initialized")
         print(f"📁 Data file: {self.data_file}")
         print(f"📂 Processed data directory: {self.processed_data_path}")
+
+    def download_nltk_data(self):
+        """
+        Download required NLTK data packages.
+
+        Downloads punkt, stopwords, wordnet, and omw-1.4 packages
+        required for text preprocessing and lemmatization.
+        """
+        required_packages = ['punkt', 'stopwords', 'wordnet', 'omw-1.4']
+
+        for package in required_packages:
+            try:
+                nltk.download(package, quiet=True)
+                print(f"✅ Downloaded NLTK package: {package}")
+            except Exception as e:
+                print(f"⚠️ Could not download NLTK package {package}: {e}")
+
+    def lemmatize_text(self, text: str) -> str:
+        """
+        Lemmatize text using NLTK WordNetLemmatizer.
+
+        Args:
+            text (str): Input text to lemmatize
+
+        Returns:
+            str: Lemmatized text with stop words removed
+        """
+        if not text or not self.lemmatizer:
+            return text or ""
+
+        try:
+            # Tokenize the text
+            tokens = word_tokenize(text.lower())
+
+            # Lemmatize tokens and remove stop words
+            lemmatized_tokens = []
+            for token in tokens:
+                if token.isalpha() and token not in self.stop_words:
+                    lemmatized_token = self.lemmatizer.lemmatize(token)
+                    lemmatized_tokens.append(lemmatized_token)
+
+            return " ".join(lemmatized_tokens)
+
+        except Exception as e:
+            print(f"⚠️ Lemmatization failed for text: {e}")
+            return text
     
     def load_data(self) -> pd.DataFrame:
         """
@@ -171,7 +220,7 @@ class MoviePreprocessor:
 
     def clean_text(self, text: str) -> str:
         """
-        Clean and preprocess text data.
+        Clean and preprocess text data with enhanced genre handling.
 
         Args:
             text (str): Raw text to clean
@@ -182,69 +231,105 @@ class MoviePreprocessor:
         if pd.isna(text) or not isinstance(text, str):
             return ""
 
-        # Convert to lowercase
-        if self.preprocessing_params.get('lowercase', True):
-            text = text.lower()
+        try:
+            # Handle pipe-separated genres and other separators
+            text = text.replace('|', ' ').replace(',', ' ')
 
-        # Remove punctuation
-        if self.preprocessing_params.get('remove_punctuation', True):
-            text = text.translate(str.maketrans('', '', string.punctuation))
+            # Convert to lowercase
+            if self.preprocessing_params.get('lowercase', True):
+                text = text.lower()
 
-        # Remove extra whitespace and numbers
-        text = re.sub(r'\s+', ' ', text)
-        text = re.sub(r'\d+', '', text)
+            # Remove punctuation (but preserve spaces)
+            if self.preprocessing_params.get('remove_punctuation', True):
+                text = re.sub(r'[^\w\s]', ' ', text)
 
-        # Tokenize
-        tokens = word_tokenize(text)
+            # Remove extra whitespace and numbers
+            text = re.sub(r'\s+', ' ', text)
+            text = re.sub(r'\d+', '', text)
 
-        # Remove stopwords
-        if self.preprocessing_params.get('remove_stopwords', True):
-            tokens = [token for token in tokens if token not in self.stop_words]
+            # Strip whitespace
+            text = text.strip()
 
-        # Filter by minimum word length
-        min_length = self.preprocessing_params.get('min_word_length', 2)
-        tokens = [token for token in tokens if len(token) >= min_length]
+            if not text:
+                return ""
 
-        # Lemmatize
-        if self.preprocessing_params.get('lemmatize', True):
-            tokens = [self.lemmatizer.lemmatize(token) for token in tokens]
+            # Tokenize with error handling
+            try:
+                tokens = word_tokenize(text)
+            except Exception:
+                # Fallback to simple split if word_tokenize fails
+                tokens = text.split()
 
-        return ' '.join(tokens)
+            # Remove stopwords
+            if self.preprocessing_params.get('remove_stopwords', True) and self.stop_words:
+                tokens = [token for token in tokens if token not in self.stop_words]
+
+            # Filter by minimum word length
+            min_length = self.preprocessing_params.get('min_word_length', 2)
+            tokens = [token for token in tokens if len(token) >= min_length and token.isalpha()]
+
+            # Lemmatize with error handling
+            if self.preprocessing_params.get('lemmatize', True) and self.lemmatizer:
+                try:
+                    tokens = [self.lemmatizer.lemmatize(token) for token in tokens]
+                except Exception as e:
+                    print(f"⚠️ Lemmatization failed: {e}")
+                    # Continue without lemmatization
+
+            return ' '.join(tokens)
+
+        except Exception as e:
+            print(f"⚠️ Text cleaning failed: {e}")
+            return ""
 
     def create_combined_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Create combined text features for each movie.
+        Create combined text features for each movie with proper error handling.
 
         Args:
             df (pd.DataFrame): Movie dataframe
 
         Returns:
             pd.DataFrame: Dataframe with combined features
+
+        Raises:
+            ValueError: If dataframe is empty
+            RuntimeError: If feature creation fails
         """
+        if df.empty:
+            raise ValueError("Cannot process empty DataFrame")
+
         print("🔄 Creating combined text features...")
 
-        # Create a copy to avoid modifying original
-        processed_df = df.copy()
+        try:
+            # Create a copy to avoid modifying original
+            processed_df = df.copy()
 
-        # Clean individual text features
-        for feature in self.text_features:
-            if feature in processed_df.columns:
-                print(f"   Cleaning {feature}...")
-                processed_df[f'{feature}_clean'] = processed_df[feature].apply(self.clean_text)
-            else:
-                print(f"   ⚠️ Feature '{feature}' not found in data, skipping...")
-                processed_df[f'{feature}_clean'] = ""
+            # Clean individual text features
+            for feature in self.text_features:
+                if feature in processed_df.columns:
+                    print(f"   Cleaning {feature}...")
+                    processed_df[f'{feature}_clean'] = processed_df[feature].apply(self.clean_text)
+                else:
+                    print(f"   ⚠️ Feature '{feature}' not found in data, skipping...")
+                    processed_df[f'{feature}_clean'] = ""
 
-        # Combine all cleaned features
-        feature_columns = [f'{feature}_clean' for feature in self.text_features
-                          if f'{feature}_clean' in processed_df.columns]
+            # Combine all cleaned features
+            feature_columns = [f'{feature}_clean' for feature in self.text_features
+                              if f'{feature}_clean' in processed_df.columns]
 
-        processed_df['combined_features'] = processed_df[feature_columns].apply(
-            lambda x: ' '.join(x.astype(str)), axis=1
-        )
+            if not feature_columns:
+                raise RuntimeError("No valid text features found for processing")
 
-        print(f"✅ Combined features created for {len(processed_df)} movies")
-        return processed_df
+            processed_df['combined_features'] = processed_df[feature_columns].apply(
+                lambda x: ' '.join(x.astype(str)), axis=1
+            )
+
+            print(f"✅ Combined features created for {len(processed_df)} movies")
+            return processed_df
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to create combined features: {e}")
 
     def create_tfidf_matrix(self, df: pd.DataFrame) -> Tuple[Any, Any]:
         """

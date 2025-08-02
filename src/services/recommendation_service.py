@@ -275,53 +275,60 @@ class RecommendationService:
     
     def get_available_genres(self) -> List[str]:
         """
-        Get list of available genres in the dataset.
-        
+        Get list of available genres in the dataset with enhanced parsing.
+
         Returns:
             List[str]: List of unique genres
         """
         if not self.is_loaded and not self.load_processed_data():
             return []
-        
+
         try:
             # Extract all genres from the dataset
             all_genres = []
             for genres_str in self.processed_movies['genres'].dropna():
-                # Split by common separators
-                genres = [g.strip() for g in genres_str.replace(',', ' ').split()]
+                # Handle multiple separators: pipe, comma, space
+                genres_str = str(genres_str).replace('|', ' ').replace(',', ' ')
+                genres = [g.strip() for g in genres_str.split() if g.strip()]
                 all_genres.extend(genres)
-            
+
             # Get unique genres and sort
             unique_genres = sorted(list(set(all_genres)))
-            
+
             print(f"✅ Found {len(unique_genres)} unique genres")
             return unique_genres
-            
+
         except Exception as e:
             print(f"❌ Error getting genres: {e}")
             return []
     
     def get_dataset_stats(self) -> Dict[str, Any]:
         """
-        Get statistics about the recommendation dataset.
-        
+        Get comprehensive statistics about the recommendation dataset.
+
         Returns:
             Dict[str, Any]: Dataset statistics
         """
         if not self.is_loaded and not self.load_processed_data():
             return {}
-        
+
         try:
+            # Calculate average similarity (excluding diagonal)
+            similarity_values = self.similarity_matrix[self.similarity_matrix != 1.0]
+            avg_similarity = float(np.mean(similarity_values)) if len(similarity_values) > 0 else 0.0
+
             stats = {
                 'total_movies': len(self.processed_movies),
-                'similarity_matrix_shape': self.similarity_matrix.shape,
-                'available_genres': len(self.get_available_genres()),
+                'total_genres': len(self.get_available_genres()),
+                'avg_similarity': avg_similarity,
+                'matrix_shape': self.similarity_matrix.shape,
                 'data_columns': list(self.processed_movies.columns),
-                'sample_movies': self.processed_movies['title'].head(5).tolist()
+                'sample_movies': self.processed_movies['title'].head(5).tolist(),
+                'memory_usage_mb': self.similarity_matrix.nbytes / (1024 * 1024)
             }
-            
+
             return stats
-            
+
         except Exception as e:
             print(f"❌ Error getting dataset stats: {e}")
             return {}
