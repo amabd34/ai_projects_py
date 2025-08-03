@@ -134,7 +134,7 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <!-- <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('home') }}">
                 <i class="fas fa-film me-2"></i>Movie Search
@@ -162,17 +162,17 @@
                 </ul>
             </div>
         </div>
-    </nav>
+    </nav> -->
 
     <div class="container">
         {% block content %}{% endblock %}
     </div>
 
-    <div class="footer">
+    <!-- <div class="footer">
         <div class="container">
             <p><i class="fas fa-code me-2"></i>Powered by OMDb API | Built with Flask</p>
         </div>
-    </div>
+    </div> -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/dropdown-search.js') }}"></script>
