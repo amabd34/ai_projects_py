@@ -153,9 +153,37 @@ ai-movie-discovery/
    python -m services.movie_preprocessor
    ```
 
-7. **Launch Application**
+7. **Launch Application** (Choose any method)
+
+   **🚀 Method 1: Universal Python Launcher (Recommended)**
    ```bash
+   python launch.py
+   ```
+   *Works with any Python installation - automatically uses virtual environment*
+
+   **⚡ Method 2: Simple startup scripts**
+   ```bash
+   # Windows (Command Prompt/PowerShell)
+   start.bat
+
+   # Windows (Git Bash) / Linux / macOS
+   ./start.sh
+   ```
+
+   **🔧 Method 3: Manual activation (if virtual environment is activated)**
+   ```bash
+   # First activate virtual environment
+   source venv/Scripts/activate  # Git Bash/Linux/macOS
+   # OR
+   venv\Scripts\activate.bat     # Windows Command Prompt
+
+   # Then run the app
    python src/app.py
+   ```
+
+   **📦 Method 4: Using run script**
+   ```bash
+   python run.py
    ```
 
 8. **Access the Platform**
